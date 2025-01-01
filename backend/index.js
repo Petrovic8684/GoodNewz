@@ -65,4 +65,8 @@ app.use("/friends", friendRoutes);
 app.use("/chats", chatRoutes);
 app.use("/messages", messageRoutes);
 
+server.listen(process.env.PORT, () => {
+  console.log(`Server started!`);
+});
+
 module.exports = server;
