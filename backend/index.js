@@ -14,6 +14,7 @@ const chatRoutes = require("./routes/chatRoutes.js");
 const messageRoutes = require("./routes/messageRoutes.js");
 
 dotenv.config();
+
 const app = express();
 const server = http.createServer(app);
 
@@ -64,8 +65,4 @@ app.use("/friends", friendRoutes);
 app.use("/chats", chatRoutes);
 app.use("/messages", messageRoutes);
 
-server.listen(process.env.PORT, () => {
-  console.log(`Server running on port ${process.env.PORT}!`);
-});
-
-module.exports = server;
+module.exports = app;
