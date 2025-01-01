@@ -1,3 +1,3 @@
-const baseUrl = "http://localhost:8003";
+const baseUrl = "https://good-newz-backend.vercel.app";
 
 export default baseUrl;
