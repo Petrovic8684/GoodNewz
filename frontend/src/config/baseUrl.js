@@ -1,3 +1,3 @@
-const baseUrl = "https://good-newz-backend.vercel.app";
+const baseUrl = "https://goodnewzbackend.onrender.com";
 
 export default baseUrl;

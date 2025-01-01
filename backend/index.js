@@ -65,4 +65,4 @@ app.use("/friends", friendRoutes);
 app.use("/chats", chatRoutes);
 app.use("/messages", messageRoutes);
 
-module.exports = app;
+module.exports = server;
