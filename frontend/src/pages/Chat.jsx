@@ -163,8 +163,8 @@ const ChatPage = () => {
           })}
           <div className="flex justify-start items-center px-4">
             {isTyping && (
-              <div className="mt-6 text-gray-500 dark:text-gray-300 italic">
-                {chat.userMe.username.split(" ")[0]} is typing...
+              <div className="my-6 text-gray-500 dark:text-gray-300 italic">
+                {chat.userThem.username.split(" ")[0]} is typing...
               </div>
             )}
           </div>
