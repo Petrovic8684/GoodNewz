@@ -6,7 +6,7 @@ import { IoMdInformationCircleOutline } from "react-icons/io";
 
 function ChatHeader({ user }) {
   return (
-    <div className="bg-white dark:bg-slate-600 h-[90px] sm:h-[100px] flex justify-around items-center px-4 text-slate-700 dark:text-white fixed top-0 left-0 right-0 z-[5] outline outline-[7px] md:outline-[10px] outline-white dark:outline-slate-800">
+    <div className="bg-white dark:bg-slate-800 h-[90px] sm:h-[100px] flex justify-around items-center px-4 text-slate-700 dark:text-white fixed top-0 left-0 right-0 z-[5] outline outline-[7px] md:outline-[10px] outline-white dark:outline-slate-800">
       {/* Back Button */}
       <Link
         to="/chats"

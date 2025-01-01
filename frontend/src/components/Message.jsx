@@ -1,11 +1,18 @@
 import React from "react";
 
-function Message({ text, time, author }) {
-  const isUserMessage = author === window.localStorage.getItem("userId");
+function Message({
+  text,
+  time,
+  author,
+  showTimestamp,
+  toggleTimestamp,
+  formatMessageTimestamp,
+}) {
+  const isUserMessage = author === localStorage.getItem("userId");
 
   return (
     <div
-      className={`mb-6 sm:mb-4 px-4 sm:px-8 flex flex-col ${
+      className={`mb-1.5 px-4 sm:px-8 flex flex-col ${
         isUserMessage ? "items-end" : "items-start"
       }`}
     >
@@ -15,17 +22,16 @@ function Message({ text, time, author }) {
             ? "bg-blue-500 dark:bg-blue-600 text-white rounded-bl-3xl relative shadow-lg"
             : "bg-slate-200 dark:bg-slate-600 text-slate-800 dark:text-white rounded-br-3xl"
         }`}
+        onClick={toggleTimestamp}
       >
         <span className="break-words">{text}</span>
       </div>
 
-      <div className="mt-2 sm:mt-3 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-        {new Date(time).toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "numeric",
-          hour12: true,
-        })}
-      </div>
+      {showTimestamp && (
+        <div className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+          {formatMessageTimestamp(time)}
+        </div>
+      )}
     </div>
   );
 }

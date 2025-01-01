@@ -23,6 +23,8 @@ const ChatPage = () => {
   const token = localStorage.getItem("token");
   const userId = localStorage.getItem("userId");
 
+  const [messageTimestamps, setMessageTimestamps] = useState({});
+
   useEffect(() => {
     handleAutoScroll();
   }, [chat?.messages]);
@@ -134,6 +136,40 @@ const ChatPage = () => {
     focuser.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const formatMessageTimestamp = (timestamp) => {
+    const messageDate = new Date(timestamp);
+    const currentDate = new Date();
+
+    const isToday =
+      messageDate.getDate() === currentDate.getDate() &&
+      messageDate.getMonth() === currentDate.getMonth() &&
+      messageDate.getFullYear() === currentDate.getFullYear();
+
+    if (isToday)
+      return messageDate.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+      });
+
+    return messageDate.toLocaleString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+    });
+  };
+
+  const handleToggleTimestamp = (messageId) => {
+    setMessageTimestamps((prev) => ({
+      ...prev,
+      [messageId]: !prev[messageId],
+    }));
+  };
+
   if (!chat || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen dark:bg-gray-800">
@@ -150,14 +186,21 @@ const ChatPage = () => {
         <ChatHeader user={chat.userThem} />
       </div>
       <div className="bg-white dark:bg-slate-800 max-h-auto">
-        <div className="flex flex-col w-[100%] xl:w-[95%] mx-auto mb-16 mt-[115px] sm:mt-[150px] mb-[60px] sm:mb-[120px]">
-          {chat.messages.map((message) => {
+        <div className="flex flex-col w-[100%] xl:w-[95%] mx-auto mb-16 mt-[125px] sm:mt-[150px] mb-[90px] sm:mb-[120px]">
+          {chat.messages.map((message, index) => {
+            const showTimestamp =
+              messageTimestamps[message._id] ||
+              index === 0 ||
+              message.author !== chat.messages[index + 1]?.author;
             return (
               <Message
                 key={message._id}
                 text={message.text}
                 time={message.createdAt}
                 author={message.author}
+                showTimestamp={showTimestamp}
+                toggleTimestamp={() => handleToggleTimestamp(message._id)}
+                formatMessageTimestamp={formatMessageTimestamp}
               />
             );
           })}
