@@ -1,4 +1,3 @@
-//const baseUrl = "https://goodnewzbackend.onrender.com";
-const baseUrl = `http://localhost:8003`;
+const baseUrl = "https://goodnewzbackend.onrender.com";
 
 export default baseUrl;
