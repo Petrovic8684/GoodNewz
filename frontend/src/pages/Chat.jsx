@@ -14,6 +14,7 @@ const ChatPage = () => {
   const [chat, setChat] = useState();
   const [isTyping, setIsTyping] = useState(false);
   const [newMessage, setNewMessage] = useState(null);
+  const [replyToMessage, setReplyToMessage] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const focuser = useRef(null);
@@ -105,9 +106,20 @@ const ChatPage = () => {
     socket.current.emit("stopTyping", chatId);
   };
 
+  const handleReply = (message) => {
+    setReplyToMessage(message);
+  };
+
+  const onCancelReply = () => {
+    setReplyToMessage(null);
+  };
+
   const handleSendMessage = async (newMessage) => {
-    if (newMessage.text.length === 0) {
-      return;
+    if (newMessage.text.length === 0) return;
+
+    if (replyToMessage) {
+      newMessage.replyTo = replyToMessage;
+      setReplyToMessage(null);
     }
 
     try {
@@ -190,23 +202,22 @@ const ChatPage = () => {
           {chat.messages.map((message, index) => {
             const showTimestamp =
               messageTimestamps[message._id] ||
-              index === 0 ||
+              (index === 0 && chat.messages.length === 1) ||
               message.author !== chat.messages[index + 1]?.author;
             return (
               <Message
                 key={message._id}
-                text={message.text}
-                time={message.createdAt}
-                author={message.author}
+                message={message}
                 showTimestamp={showTimestamp}
                 toggleTimestamp={() => handleToggleTimestamp(message._id)}
                 formatMessageTimestamp={formatMessageTimestamp}
+                onReply={handleReply}
               />
             );
           })}
           <div className="flex justify-start items-center px-4">
             {isTyping && (
-              <div className="my-6 text-gray-500 dark:text-gray-300 italic">
+              <div className="mt-6 mb-3 text-gray-500 dark:text-gray-300 italic">
                 {chat.userThem.username.split(" ")[0]} is typing...
               </div>
             )}
@@ -215,11 +226,14 @@ const ChatPage = () => {
 
         <span ref={focuser} className="focuser"></span>
       </div>
+
       <ChatInput
         handleSendMessage={handleSendMessage}
         handleAutoScroll={handleAutoScroll}
         handleTyping={handleTyping}
         handleStopTyping={handleStopTyping}
+        replyToMessage={replyToMessage}
+        onCancelReply={onCancelReply}
       />
     </main>
   );

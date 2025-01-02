@@ -25,6 +25,14 @@ const sendMessage = async (req, res) => {
     if (!newMessage || newMessage.text.length === 0)
       return res.status(400).json({ message: "Invalid message text!" });
 
+    if (newMessage.replyTo) {
+      const repliedMessage = await MessageModel.findById(
+        newMessage.replyTo._id
+      );
+      if (!repliedMessage)
+        return res.status(404).json({ error: "Replied message not found." });
+    }
+
     const chat = await fetchChatById(chatId);
     if (!chat) return res.status(404).json({ message: "Chat not found!" });
 
@@ -38,6 +46,7 @@ const sendMessage = async (req, res) => {
       text: newMessage.text,
       author: newMessage.author,
       chat: chat._id,
+      replyTo: newMessage.replyTo ? newMessage.replyTo._id : null,
     });
 
     const savedMessage = await message.save();
@@ -45,9 +54,13 @@ const sendMessage = async (req, res) => {
     chat.messages.push(savedMessage._id);
     await chat.save();
 
-    req.io.to(chatId).emit("newMessage", savedMessage);
+    const populatedMessage = await MessageModel.findById(
+      savedMessage._id
+    ).populate("replyTo", "text");
 
-    res.status(200).json({ message: savedMessage });
+    req.io.to(chatId).emit("newMessage", populatedMessage);
+
+    res.status(200).json({ message: populatedMessage });
   } catch (error) {
     res
       .status(500)

@@ -22,7 +22,14 @@ const fetchChatById = async (chatId) => {
     const chat = await ChatModel.findById(chatId)
       .populate("userMe", "username image")
       .populate("userThem", "username image")
-      .populate("messages", "text author createdAt");
+      .populate({
+        path: "messages",
+        select: "text author createdAt replyTo",
+        populate: {
+          path: "replyTo",
+          select: "text",
+        },
+      });
     if (!chat) return null;
 
     return chat;

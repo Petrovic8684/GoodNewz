@@ -17,6 +17,11 @@ const MessageSchema = new mongoose.Schema(
       ref: "Chat",
       required: true,
     },
+    replyTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+      default: null,
+    },
   },
   { timestamps: true }
 );
