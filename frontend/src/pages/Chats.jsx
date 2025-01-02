@@ -140,6 +140,7 @@ const ChatsPage = () => {
                 user={chat.userMe._id === userId ? chat.userThem : chat.userMe}
                 text={chat.messages[chat.messages.length - 1]?.text}
                 time={chat.messages[chat.messages.length - 1]?.createdAt}
+                unreadMessagesCount={chat.unreadMessagesCount}
               />
             ))}
           </div>

@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-function ChatPreview({ id, user, text, time, count }) {
+function ChatPreview({ id, user, text, time, unreadMessagesCount }) {
   return (
     <Link
       to={`/chats/${id}`}
@@ -44,11 +44,13 @@ function ChatPreview({ id, user, text, time, count }) {
             </div>
           )}
 
-          {count && (
-            <div className="h-8 w-8 sm:h-10 sm:w-10 text-white bg-blue-600 rounded-2xl flex justify-center items-center">
-              {count}
-            </div>
-          )}
+          {unreadMessagesCount !== undefined &&
+            unreadMessagesCount !== null &&
+            unreadMessagesCount > 0 && (
+              <div className="h-8 w-8 sm:h-10 sm:w-10 text-white bg-blue-600 rounded-2xl flex justify-center items-center">
+                {unreadMessagesCount}
+              </div>
+            )}
         </div>
       </div>
     </Link>

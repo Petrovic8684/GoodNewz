@@ -10,16 +10,34 @@ const fetchChats = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized!" });
 
     if (!fetchUserById(userId))
-      res.status(404).json({ message: "User not found!" });
+      return res.status(404).json({ message: "User not found!" });
 
     const chats = await ChatModel.find({
       $or: [{ userMe: userId }, { userThem: userId }],
     })
       .populate("userMe", "username image")
       .populate("userThem", "username image")
-      .populate("messages", "text author createdAt");
+      .populate("messages", "text author createdAt read");
 
-    res.status(200).json({ chats });
+    const updatedChats = await Promise.all(
+      chats.map(async (chat) => {
+        const oneMinuteLater = new Date(
+          req.user.lastSeen.getTime() + 60 * 1000
+        );
+        const unreadMessagesCount = await MessageModel.countDocuments({
+          chat: chat._id,
+          createdAt: { $gt: oneMinuteLater },
+          read: false,
+        });
+
+        return {
+          ...chat.toObject(),
+          unreadMessagesCount,
+        };
+      })
+    );
+
+    res.status(200).json({ chats: updatedChats });
   } catch (error) {
     res
       .status(500)

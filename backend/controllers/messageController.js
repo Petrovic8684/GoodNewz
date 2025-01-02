@@ -101,4 +101,22 @@ const deleteMessage = async (req, res) => {
   }
 };
 
-module.exports = { fetchMessages, sendMessage, deleteMessage };
+const markAsRead = async (req, res) => {
+  try {
+    const { chatId, userId } = req.body;
+
+    if (req.user._id.toString() !== userId)
+      return res.status(403).json({ message: "Unauthorized!" });
+
+    await MessageModel.updateMany(
+      { chat: chatId, author: { $ne: userId }, read: false },
+      { $set: { read: true } }
+    );
+
+    res.status(200).json({ message: "Messages marked as read!" });
+  } catch (error) {
+    res.status(500).json({ message: "Error marking messages as read!", error });
+  }
+};
+
+module.exports = { fetchMessages, sendMessage, deleteMessage, markAsRead };

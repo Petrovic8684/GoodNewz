@@ -35,6 +35,7 @@ const ChatPage = () => {
 
   useEffect(() => {
     fetchChatData();
+    markMessagesAsRead();
 
     socket.current.emit("joinChat", chatId);
 
@@ -165,6 +166,26 @@ const ChatPage = () => {
 
   const handleAutoScroll = () => {
     focuser.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const markMessagesAsRead = async () => {
+    try {
+      await axios.post(
+        `${baseUrl}/messages/markAsRead`,
+        { chatId, userId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error) {
+      if (error.response) {
+        console.error("Error:", error.response.data.message);
+      } else {
+        console.error("Error marking messages as read:", error.message);
+      }
+    }
   };
 
   const formatMessageTimestamp = (timestamp) => {
