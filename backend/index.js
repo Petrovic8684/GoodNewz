@@ -7,6 +7,8 @@ const socketIO = require("socket.io");
 const { connectDB } = require("./config/db");
 const { initCloudinary } = require("./config/cloudinary");
 
+const UserModel = require("./models/userModel.js");
+
 const userRoutes = require("./routes/userRoutes.js");
 const requestRoutes = require("./routes/requestRoutes.js");
 const friendRoutes = require("./routes/friendRoutes.js");
@@ -40,6 +42,19 @@ io.on("connection", (socket) => {
 
   socket.on("stopTyping", (chatId) => {
     socket.to(chatId).emit("stopTyping", chatId);
+  });
+
+  socket.on("userActive", async (userId) => {
+    try {
+      const user = await UserModel.findByIdAndUpdate(
+        userId,
+        { lastSeen: new Date() },
+        { new: true }
+      );
+      io.emit("lastSeenUpdate", { userId, lastSeen: user.lastSeen });
+    } catch (error) {
+      console.error("Error updating lastSeen:", error);
+    }
   });
 
   socket.on("disconnect", () => {

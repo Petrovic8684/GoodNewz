@@ -60,7 +60,7 @@ function Message({
       )}
 
       <div
-        className={`max-w-full sm:max-w-[80%] px-4 py-3 sm:px-6 sm:py-4 text-sm sm:text-base ${
+        className={`max-w-[70%] sm:max-w-[60%] px-4 py-3 sm:px-6 sm:py-4 text-sm sm:text-base ${
           isUserMessage
             ? `bg-blue-500 dark:bg-blue-600 text-white rounded-bl-3xl relative shadow-lg ${
                 replyTo ? "rounded-tl-3xl" : "rounded-t-3xl"

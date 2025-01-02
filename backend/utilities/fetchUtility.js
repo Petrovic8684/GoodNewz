@@ -20,8 +20,8 @@ const fetchUserById = async (userId) => {
 const fetchChatById = async (chatId) => {
   try {
     const chat = await ChatModel.findById(chatId)
-      .populate("userMe", "username image")
-      .populate("userThem", "username image")
+      .populate("userMe", "username image lastSeen")
+      .populate("userThem", "username image lastSeen")
       .populate({
         path: "messages",
         select: "text author createdAt replyTo",

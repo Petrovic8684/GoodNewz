@@ -48,6 +48,10 @@ const UserSchema = new mongoose.Schema(
     lastImageUpload: {
       type: Date,
     },
+    lastSeen: {
+      type: Date,
+      default: new Date(),
+    },
   },
   { timestamps: true }
 );

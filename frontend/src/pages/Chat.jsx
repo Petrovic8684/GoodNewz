@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { io } from "socket.io-client";
+import { IoIosArrowDown } from "react-icons/io";
 
 import baseUrl from "../config/baseUrl";
 
@@ -16,6 +17,7 @@ const ChatPage = () => {
   const [newMessage, setNewMessage] = useState(null);
   const [replyToMessage, setReplyToMessage] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isArrowVisible, setIsArrowVisible] = useState(false);
 
   const focuser = useRef(null);
   const socket = useRef(null);
@@ -37,10 +39,6 @@ const ChatPage = () => {
   useEffect(() => {
     fetchChatData();
 
-    socket.current = io(baseUrl, {
-      query: { token },
-    });
-
     socket.current.emit("joinChat", chatId);
 
     socket.current.on("newMessage", (message) => {
@@ -55,24 +53,31 @@ const ChatPage = () => {
           messages: [...prev.messages, message],
         };
       });
-      handleAutoScroll();
     });
+
+    const handleScroll = () => {
+      const scrollPosition = window.innerHeight + window.scrollY;
+      const bottomThreshold = document.body.offsetHeight - 5;
+      const isAtBottom = scrollPosition >= bottomThreshold;
+      setIsArrowVisible(!isAtBottom);
+    };
+
+    window.addEventListener("scroll", handleScroll);
 
     return () => {
       socket.current.emit("leaveChat", chatId);
       socket.current.disconnect();
+      window.removeEventListener("scroll", handleScroll);
     };
   }, [chatId]);
 
   useEffect(() => {
     socket.current.on("typing", () => {
       setIsTyping(true);
-      handleAutoScroll();
     });
 
     socket.current.on("stopTyping", () => {
       setIsTyping(false);
-      handleAutoScroll();
     });
 
     return () => {
@@ -83,6 +88,10 @@ const ChatPage = () => {
 
   const fetchChatData = async () => {
     try {
+      socket.current = io(baseUrl, {
+        query: { token },
+      });
+
       setLoading(true);
       const response = await axios.get(`${baseUrl}/chats/${chatId}`, {
         headers: {
@@ -91,6 +100,7 @@ const ChatPage = () => {
       });
 
       setChat(response.data.chat);
+      socket.current.emit("userActive", response.data.chat.userMe._id);
     } catch (error) {
       console.error(error);
     } finally {
@@ -100,10 +110,12 @@ const ChatPage = () => {
 
   const handleTyping = () => {
     socket.current.emit("typing", chatId);
+    socket.current.emit("userActive", chat.userMe._id);
   };
 
   const handleStopTyping = () => {
     socket.current.emit("stopTyping", chatId);
+    socket.current.emit("userActive", chat.userMe._id);
   };
 
   const handleReply = (message) => {
@@ -139,6 +151,7 @@ const ChatPage = () => {
       const savedMessage = response.data.message;
 
       socket.current.emit("sendMessage", savedMessage);
+      socket.current.emit("userActive", chat.userMe._id);
     } catch (error) {
       console.error(error);
     }
@@ -198,7 +211,7 @@ const ChatPage = () => {
         <ChatHeader user={chat.userThem} />
       </div>
       <div className="bg-white dark:bg-slate-800 max-h-auto">
-        <div className="flex flex-col w-[100%] xl:w-[95%] mx-auto mb-16 mt-[125px] sm:mt-[150px] mb-[90px] sm:mb-[120px]">
+        <div className="flex flex-col w-[100%] xl:w-[95%] mx-auto mt-[85px] sm:mt-[100px] mb-[85px] sm:mb-[110px]">
           {chat.messages.map((message, index) => {
             const showTimestamp =
               messageTimestamps[message._id] ||
@@ -215,9 +228,9 @@ const ChatPage = () => {
               />
             );
           })}
-          <div className="flex justify-start items-center px-4">
+          <div className="fixed bottom-[47px] sm:bottom-[70px] left-4 sm:left-8 right-0">
             {isTyping && (
-              <div className="mt-6 mb-3 text-gray-500 dark:text-gray-300 italic">
+              <div className="mt-4 mb-3 text-gray-500 dark:text-gray-300 italic">
                 {chat.userThem.username.split(" ")[0]} is typing...
               </div>
             )}
@@ -226,10 +239,20 @@ const ChatPage = () => {
 
         <span ref={focuser} className="focuser"></span>
       </div>
-
+      {isArrowVisible && (
+        <div
+          onClick={handleAutoScroll}
+          className={`fixed ${
+            replyToMessage
+              ? "bottom-[92px] sm:bottom-[117px]"
+              : "bottom-14 sm:bottom-[73px]"
+          } right-[47%] bg-slate-200 text-gray-800 rounded-full p-1 cursor-pointer shadow-md dark:shadow-slate-600 z-50`}
+        >
+          <IoIosArrowDown size={24} className="text-black" />
+        </div>
+      )}
       <ChatInput
         handleSendMessage={handleSendMessage}
-        handleAutoScroll={handleAutoScroll}
         handleTyping={handleTyping}
         handleStopTyping={handleStopTyping}
         replyToMessage={replyToMessage}
