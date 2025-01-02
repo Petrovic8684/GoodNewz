@@ -11,12 +11,14 @@ const RegisterPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     const userData = { username: username, email: email, password: password };
 
@@ -32,6 +34,8 @@ const RegisterPage = () => {
           ? err.response.data.message
           : "Something went wrong on register attempt!"
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -124,9 +128,12 @@ const RegisterPage = () => {
               </div>
               <button
                 type="submit"
-                className="mb-2 w-full block text-white bg-blue-500 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                disabled={loading}
+                className={`mb-2 w-full block text-white ${
+                  loading ? "bg-blue-300" : "bg-blue-500"
+                } font-medium rounded-lg text-sm px-5 py-2.5 text-center`}
               >
-                Submit
+                {loading ? "Loading..." : "Submit"}
               </button>
               {error && <div className="text-red-600 mb-2">{error}</div>}
               <p className="text-sm font-light text-slate-500">

@@ -96,4 +96,28 @@ const createChat = async (req, res) => {
   }
 };
 
-module.exports = { fetchChats, fetchChat, createChat };
+const deleteChat = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const chat = await fetchChatById(id);
+    if (!chat) return res.status(404).json({ message: "Chat not found!" });
+
+    if (
+      req.user._id.toString() !== chat.userMe._id.toString() &&
+      req.user._id.toString() !== chat.userThem._id.toString()
+    )
+      return res.status(403).json({ message: "Unauthorized!" });
+
+    await MessageModel.deleteMany({ chat: id });
+    await ChatModel.findByIdAndDelete(id);
+
+    res.status(200).json({ message: "Chat deleted successfully!" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error deleting chat!", error: error.message });
+  }
+};
+
+module.exports = { fetchChats, fetchChat, createChat, deleteChat };

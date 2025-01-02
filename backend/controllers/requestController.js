@@ -45,7 +45,10 @@ const cancelRequest = async (req, res) => {
   try {
     const { senderUserId, receiverUserId } = req.body;
 
-    if (req.user._id.toString() !== senderUserId)
+    if (
+      req.user._id.toString() !== senderUserId &&
+      req.user._id.toString() !== receiverUserId
+    )
       return res.status(403).json({ message: "Unauthorized!" });
 
     const sender = await fetchUserById(senderUserId);

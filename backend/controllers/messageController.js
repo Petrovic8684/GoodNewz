@@ -68,4 +68,37 @@ const sendMessage = async (req, res) => {
   }
 };
 
-module.exports = { fetchMessages, sendMessage };
+const deleteMessage = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const message = await MessageModel.findById(id);
+    if (!message)
+      return res.status(404).json({ message: "Message not found!" });
+
+    const chat = await fetchChatById(message.chat);
+    if (!chat) return res.status(404).json({ message: "Chat not found!" });
+
+    if (
+      req.user._id.toString() !== message.author.toString() &&
+      req.user._id.toString() !== chat.userMe.toString() &&
+      req.user._id.toString() !== chat.userThem.toString()
+    )
+      return res.status(403).json({ message: "Unauthorized!" });
+
+    chat.messages.pull(id);
+    await chat.save();
+
+    await MessageModel.findByIdAndDelete(id);
+
+    req.io.to(chat._id.toString()).emit("messageDeleted", id);
+
+    res.status(200).json({ message: "Message deleted successfully!" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error deleting message!", error: error.message });
+  }
+};
+
+module.exports = { fetchMessages, sendMessage, deleteMessage };

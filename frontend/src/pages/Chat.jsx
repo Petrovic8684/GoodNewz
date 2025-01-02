@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { io } from "socket.io-client";
 import { IoIosArrowDown } from "react-icons/io";
@@ -18,19 +18,16 @@ const ChatPage = () => {
   const [replyToMessage, setReplyToMessage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isArrowVisible, setIsArrowVisible] = useState(false);
+  const [messageTimestamps, setMessageTimestamps] = useState({});
 
   const focuser = useRef(null);
   const socket = useRef(null);
 
+  const navigate = useNavigate();
+
   const messageReceivedSound = new Audio("/sounds/messageRcv.wav");
   const token = localStorage.getItem("token");
   const userId = localStorage.getItem("userId");
-
-  const [messageTimestamps, setMessageTimestamps] = useState({});
-
-  useEffect(() => {
-    handleAutoScroll();
-  }, [chat?.messages]);
 
   useEffect(() => {
     if (newMessage) messageReceivedSound.play();
@@ -51,6 +48,15 @@ const ChatPage = () => {
         return {
           ...prev,
           messages: [...prev.messages, message],
+        };
+      });
+    });
+
+    socket.current.on("messageDeleted", (messageId) => {
+      setChat((prev) => {
+        return {
+          ...prev,
+          messages: prev.messages.filter((msg) => msg._id !== messageId),
         };
       });
     });
@@ -195,6 +201,29 @@ const ChatPage = () => {
     }));
   };
 
+  const deleteChat = async () => {
+    try {
+      const isConfirmed = window.confirm(
+        "Are you sure you want to delete this chat?"
+      );
+      if (!isConfirmed) return;
+
+      await axios.delete(`${baseUrl}/chats/${chatId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      navigate("/chats");
+    } catch (error) {
+      if (error.response) {
+        console.error(error.response.data.message);
+      } else {
+        console.error("Error deleting chat!", error.message);
+      }
+    }
+  };
+
   if (!chat || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen dark:bg-gray-800">
@@ -208,7 +237,7 @@ const ChatPage = () => {
   return (
     <main className="h-[100%] flex flex-col justify-between bg-white dark:bg-slate-800">
       <div>
-        <ChatHeader user={chat.userThem} />
+        <ChatHeader user={chat.userThem} deleteChat={deleteChat} />
       </div>
       <div className="bg-white dark:bg-slate-800 max-h-auto">
         <div className="flex flex-col w-[100%] xl:w-[95%] mx-auto mt-[85px] sm:mt-[100px] mb-[85px] sm:mb-[110px]">

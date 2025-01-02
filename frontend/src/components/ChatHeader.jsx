@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { IoArrowBack } from "react-icons/io5";
-import { IoMdInformationCircleOutline } from "react-icons/io";
+import { RiDeleteBinLine } from "react-icons/ri";
 import { io } from "socket.io-client";
 import baseUrl from "../config/baseUrl";
 import getLastSeen from "../utilities/lastSeenUtility";
 
-function ChatHeader({ user }) {
+function ChatHeader({ user, deleteChat }) {
   const socket = useRef(null);
   const [lastSeen, setLastSeen] = useState(user.lastSeen);
   const lastSeenInterval = useRef(null);
@@ -49,12 +49,8 @@ function ChatHeader({ user }) {
   return (
     <div className="w-screen bg-white dark:bg-slate-800 h-[65px] sm:h-[80px] flex justify-around items-center px-4 text-slate-700 dark:text-white fixed top-0 left-0 right-0 z-[5] outline outline-[7px] md:outline-[10px] outline-white dark:outline-slate-800">
       {/* Back Button */}
-      <Link
-        to="/chats"
-        aria-label="Back to Chats"
-        className="hover:text-slate-500 dark:hover:text-slate-300 transition-all"
-      >
-        <IoArrowBack className="text-3xl dark:text-slate-400" />
+      <Link to="/chats">
+        <IoArrowBack className="text-3xl text-slate-500 dark:text-slate-400" />
       </Link>
 
       {/* User Info Section */}
@@ -81,14 +77,10 @@ function ChatHeader({ user }) {
         </div>
       </div>
 
-      {/* Info Button */}
-      <Link
-        to="#"
-        aria-label="Chat Information"
-        className="hover:text-slate-500 dark:hover:text-slate-300 transition-all"
-      >
-        <IoMdInformationCircleOutline className="text-3xl dark:text-slate-400" />
-      </Link>
+      {/* Delete Chat Button */}
+      <div onClick={deleteChat}>
+        <RiDeleteBinLine className="text-3xl text-slate-500 dark:text-slate-400 hover:cursor-pointer" />
+      </div>
     </div>
   );
 }
