@@ -41,12 +41,6 @@ function Message({
       }
       setTranslateX(0);
     },
-    onTap: (eventData) => {
-      if (eventData.event.target.closest(".message-container")) {
-        setShowTrash((prevShowTrash) => !prevShowTrash);
-        toggleTimestamp();
-      }
-    },
 
     preventDefaultTouchmoveEvent: true,
     trackMouse: true,
@@ -131,6 +125,10 @@ function Message({
                     replyTo ? "rounded-tr-3xl" : "rounded-t-3xl"
                   }`
             }`}
+            onClick={() => {
+              setShowTrash((prevShowTrash) => !prevShowTrash);
+              toggleTimestamp();
+            }}
           >
             <span className="break-words">{text}</span>
           </div>
