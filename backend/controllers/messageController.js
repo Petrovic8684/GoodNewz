@@ -119,4 +119,62 @@ const markAsRead = async (req, res) => {
   }
 };
 
-module.exports = { fetchMessages, sendMessage, deleteMessage, markAsRead };
+const reactToMessage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reaction } = req.body;
+    const userId = req.user._id;
+
+    const message = await MessageModel.findById(id).populate(
+      "reactions.user",
+      "username image"
+    );
+
+    if (!message)
+      return res.status(404).json({ message: "Message not found!" });
+
+    const existingReactionIndex = message.reactions.findIndex(
+      (r) => r.user._id.toString() === userId.toString()
+    );
+
+    if (existingReactionIndex !== -1) {
+      const existingReaction = message.reactions[existingReactionIndex];
+
+      if (existingReaction.reaction === reaction) {
+        message.reactions.splice(existingReactionIndex, 1);
+        await message.save();
+        await message.populate("reactions.user", "username image");
+
+        req.io.to(message.chat.toString()).emit("reactionUpdated", {
+          messageId: id,
+          reactions: message.reactions,
+        });
+        return res.status(200).json({ message: "Reaction canceled!" });
+      } else message.reactions[existingReactionIndex].reaction = reaction;
+    } else message.reactions.push({ user: userId, reaction });
+
+    await message.save();
+    await message.populate("reactions.user", "username image");
+
+    req.io.to(message.chat.toString()).emit("reactionUpdated", {
+      messageId: id,
+      reactions: message.reactions,
+    });
+
+    res
+      .status(200)
+      .json({ message: "Reaction updated!", reactions: message.reactions });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error updating reaction!", error: error.message });
+  }
+};
+
+module.exports = {
+  fetchMessages,
+  sendMessage,
+  deleteMessage,
+  markAsRead,
+  reactToMessage,
+};

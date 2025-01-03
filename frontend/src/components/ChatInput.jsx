@@ -32,7 +32,7 @@ function ChatInput({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 shadow-lg">
+    <div className="fixed bottom-0 left-0 right-0 shadow-lg z-[5]">
       <div className="flex flex-col items-center">
         <div className="bg-transparent">
           {replyToMessage && (

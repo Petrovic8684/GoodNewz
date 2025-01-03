@@ -24,12 +24,19 @@ const fetchChatById = async (chatId) => {
       .populate("userThem", "username image lastSeen")
       .populate({
         path: "messages",
-        select: "text author createdAt replyTo",
-        populate: {
-          path: "replyTo",
-          select: "text",
-        },
+        select: "text author createdAt replyTo reactions",
+        populate: [
+          {
+            path: "replyTo",
+            select: "text",
+          },
+          {
+            path: "reactions.user",
+            select: "username image",
+          },
+        ],
       });
+
     if (!chat) return null;
 
     return chat;

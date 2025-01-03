@@ -62,6 +62,22 @@ const ChatPage = () => {
       });
     });
 
+    socket.current.on("reactionUpdated", (reactionData) => {
+      setChat((prev) => {
+        const updatedMessages = prev.messages.map((msg) => {
+          if (msg._id === reactionData.messageId) {
+            return { ...msg, reactions: reactionData.reactions };
+          }
+          return msg;
+        });
+
+        return {
+          ...prev,
+          messages: updatedMessages,
+        };
+      });
+    });
+
     const handleScroll = () => {
       const scrollPosition = window.innerHeight + window.scrollY;
       const bottomThreshold = document.body.offsetHeight - 5;
