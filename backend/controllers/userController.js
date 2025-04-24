@@ -29,7 +29,7 @@ const registerUser = async (req, res) => {
     if (existingUser)
       return res.status(400).json({ message: "User already exists!" });
 
-    if (username) {
+    if (username)
       if (
         typeof username !== "string" ||
         username.trim().length < 3 ||
@@ -38,9 +38,6 @@ const registerUser = async (req, res) => {
         return res.status(400).json({
           message: "Username must be between 3 and 30 characters long!",
         });
-
-      user.username = username.trim();
-    }
 
     if (typeof password !== "string" || password.length < 6)
       return res

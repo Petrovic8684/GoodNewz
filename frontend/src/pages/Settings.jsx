@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import api from "../config/api";
 import { MdOutlinePhotoLibrary } from "react-icons/md";
 import { FiMoon, FiSun } from "react-icons/fi";
 import { LuLogOut } from "react-icons/lu";
@@ -8,7 +8,6 @@ import { FaEdit } from "react-icons/fa";
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
 import Footer from "../components/Footer";
-import baseUrl from "../config/baseUrl";
 import useDarkMode from "../hooks/useDarkMode";
 
 function SettingsPage() {
@@ -49,7 +48,7 @@ function SettingsPage() {
   const fetchUserSettings = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${baseUrl}/users/${userId}`, {
+      const response = await api.get(`/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -70,8 +69,8 @@ function SettingsPage() {
 
   const updateUsername = async (newUsername) => {
     try {
-      const response = await axios.put(
-        `${baseUrl}/users/${userId}`,
+      const response = await api.put(
+        `/users/${userId}`,
         { username: newUsername },
         {
           headers: {
@@ -117,8 +116,8 @@ function SettingsPage() {
         if (croppedCanvas) {
           const dataUrl = croppedCanvas.toDataURL();
 
-          const response = await axios.post(
-            `${baseUrl}/users/${userId}/uploadImage`,
+          const response = await api.post(
+            `/users/${userId}/uploadImage`,
             { image: dataUrl },
             {
               headers: {

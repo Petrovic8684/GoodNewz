@@ -1,11 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
-import axios from "axios";
-
-import baseUrl from "../config/baseUrl";
-
+import api from "../config/api";
 import { IoIosSearch } from "react-icons/io";
 import { GoPlus } from "react-icons/go";
-
 import ChatPreview from "../components/ChatPreview";
 import MainFooter from "../components/Footer";
 import Friend from "../components/Friend";
@@ -32,7 +28,7 @@ const ChatsPage = () => {
   const fetchChats = async () => {
     try {
       setLoading((prev) => ({ ...prev, chats: true }));
-      const response = await axios.get(`${baseUrl}/chats?userId=${userId}`, {
+      const response = await api.get(`/chats?userId=${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -49,7 +45,7 @@ const ChatsPage = () => {
   const fetchFriends = async () => {
     try {
       setLoading((prev) => ({ ...prev, friends: true }));
-      const response = await axios.get(`${baseUrl}/friends?userId=${userId}`, {
+      const response = await api.get(`/friends?userId=${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -62,10 +58,11 @@ const ChatsPage = () => {
   };
 
   const filteredChats = useMemo(() => {
+    const searchQuery = query.toLowerCase().trim();
     return chats.filter((chat) =>
-      chat?.userThem.username.toLowerCase().includes(query.toLowerCase())
+      chat?.userThem.username.toLowerCase().includes(searchQuery)
     );
-  }, [chats, query]);
+  }, [query, chats]);
 
   const handleToggleChatFilterSearch = () => {
     setIsSearchActive((prevState) => !prevState);
@@ -73,8 +70,8 @@ const ChatsPage = () => {
 
   const handleOpenChat = async (friendId) => {
     try {
-      const response = await axios.post(
-        `${baseUrl}/chats`,
+      const response = await api.post(
+        `/chats`,
         {
           userMeId: userId,
           userThemId: friendId,
@@ -94,7 +91,13 @@ const ChatsPage = () => {
     }
   };
 
-  if (!chats || !friends || loading.chats || loading.friends) {
+  if (
+    !chats ||
+    !friends ||
+    loading.chats ||
+    loading.friends ||
+    !filteredChats
+  ) {
     return (
       <div className="flex items-center justify-center min-h-screen dark:bg-gray-800">
         <div className="text-center text-2xl text-gray-700 dark:text-gray-200">

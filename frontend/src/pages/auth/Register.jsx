@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
-
-import baseUrl from "../../config/baseUrl";
+import api from "../../config/api";
 
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 
@@ -25,7 +23,7 @@ const RegisterPage = () => {
     try {
       setError("");
 
-      await axios.post(`${baseUrl}/users/register`, userData);
+      await api.post(`/users/register`, userData);
 
       navigate("/login");
     } catch (err) {

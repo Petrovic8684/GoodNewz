@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
-
-import baseUrl from "../../config/baseUrl";
+import api from "../../config/api";
 
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 
@@ -24,7 +22,7 @@ const LoginPage = () => {
     try {
       setError("");
 
-      const response = await axios.post(`${baseUrl}/users/login`, userData);
+      const response = await api.post(`/users/login`, userData);
 
       localStorage.setItem("userId", response.data.user._id);
       localStorage.setItem("token", response.data.token);

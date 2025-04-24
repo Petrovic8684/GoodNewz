@@ -1,8 +1,5 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-
-import baseUrl from "../config/baseUrl";
-
+import React, { useState, useEffect, useMemo } from "react";
+import api from "../config/api";
 import { IoIosSearch } from "react-icons/io";
 
 import Footer from "../components/Footer";
@@ -29,7 +26,7 @@ function FriendsPage() {
   const fetchFriendsOverview = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${baseUrl}/friends?userId=${userId}`, {
+      const response = await api.get(`/friends?userId=${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -41,10 +38,19 @@ function FriendsPage() {
     }
   };
 
+  const filteredUsers = useMemo(() => {
+    const searchQuery = query.toLowerCase().trim();
+    if (!searchQuery) return [];
+
+    return data.users.filter((user) =>
+      user.username.toLowerCase().includes(searchQuery)
+    );
+  }, [query, data.users]);
+
   const handleAccept = async (id) => {
     try {
-      const response = await axios.put(
-        `${baseUrl}/friends`,
+      const response = await api.put(
+        `/friends`,
         {
           receiverUserId: userId,
           senderUserId: id,
@@ -62,7 +68,7 @@ function FriendsPage() {
 
   const handleUnfriend = async (id) => {
     try {
-      const response = await axios.delete(`${baseUrl}/friends`, {
+      const response = await api.delete(`/friends`, {
         data: {
           receiverUserId: userId,
           senderUserId: id,
@@ -80,8 +86,8 @@ function FriendsPage() {
 
   const handleSendRequest = async (id) => {
     try {
-      const response = await axios.put(
-        `${baseUrl}/requests`,
+      const response = await api.put(
+        `/requests`,
         {
           receiverUserId: id,
           senderUserId: userId,
@@ -99,7 +105,7 @@ function FriendsPage() {
 
   const handleReject = async (id) => {
     try {
-      const response = await axios.delete(`${baseUrl}/requests`, {
+      const response = await api.delete(`/requests`, {
         data: {
           receiverUserId: userId,
           senderUserId: id,
@@ -115,12 +121,14 @@ function FriendsPage() {
 
   const handleCancel = async (id) => {
     try {
-      const response = await axios.delete(`${baseUrl}/requests`, {
+      const response = await api.delete(`/requests`, {
         data: {
           receiverUserId: id,
           senderUserId: userId,
         },
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       fetchFriendsOverview();
@@ -133,7 +141,7 @@ function FriendsPage() {
     setIsSearchActive((prevState) => !prevState);
   };
 
-  if (!data || loading) {
+  if (!data || loading || !filteredUsers) {
     return (
       <div className="flex items-center justify-center min-h-screen dark:bg-gray-800">
         <div className="text-center text-2xl text-gray-700 dark:text-gray-200">
@@ -204,8 +212,8 @@ function FriendsPage() {
                 handleReject={handleReject}
               />
             ))}
-          {data.users &&
-            data.users.map((user) => (
+          {filteredUsers &&
+            filteredUsers.map((user) => (
               <Friend
                 key={user._id}
                 user={user}

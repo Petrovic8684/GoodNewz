@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../config/api";
+import baseUrl from "../config/baseUrl";
 import { io } from "socket.io-client";
 import { IoIosArrowDown } from "react-icons/io";
-
-import baseUrl from "../config/baseUrl";
 
 import ChatHeader from "../components/ChatHeader";
 import Message from "../components/Message";
@@ -34,6 +33,12 @@ const ChatPage = () => {
   }, [newMessage]);
 
   useEffect(() => {
+    if (chat && !loading) {
+      handleAutoScroll(false);
+    }
+  }, [chat, loading]);
+
+  useEffect(() => {
     fetchChatData();
     markMessagesAsRead();
 
@@ -51,6 +56,13 @@ const ChatPage = () => {
           messages: [...prev.messages, message],
         };
       });
+    });
+
+    socket.current.on("chatDeleted", (deletedByUserId) => {
+      if (userId === deletedByUserId) return;
+
+      window.alert("Your friend has just deleted this chat!");
+      navigate("/chats");
     });
 
     socket.current.on("messageDeleted", (messageId) => {
@@ -116,7 +128,7 @@ const ChatPage = () => {
       });
 
       setLoading(true);
-      const response = await axios.get(`${baseUrl}/chats/${chatId}`, {
+      const response = await api.get(`/chats/${chatId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -158,8 +170,8 @@ const ChatPage = () => {
     }
 
     try {
-      const response = await axios.put(
-        `${baseUrl}/messages`,
+      const response = await api.put(
+        `/messages`,
         {
           chatId: chatId,
           newMessage: newMessage,
@@ -180,14 +192,14 @@ const ChatPage = () => {
     }
   };
 
-  const handleAutoScroll = () => {
-    focuser.current?.scrollIntoView({ behavior: "smooth" });
+  const handleAutoScroll = (isSmooth) => {
+    focuser.current?.scrollIntoView({ behavior: isSmooth ? "smooth" : "auto" });
   };
 
   const markMessagesAsRead = async () => {
     try {
-      await axios.post(
-        `${baseUrl}/messages/markAsRead`,
+      await api.post(
+        `/messages/markAsRead`,
         { chatId, userId },
         {
           headers: {
@@ -245,11 +257,13 @@ const ChatPage = () => {
       );
       if (!isConfirmed) return;
 
-      await axios.delete(`${baseUrl}/chats/${chatId}`, {
+      await api.delete(`/chats/${chatId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
+
+      socket.current.emit("chatDeleted", userId);
 
       navigate("/chats");
     } catch (error) {
@@ -302,21 +316,23 @@ const ChatPage = () => {
             )}
           </div>
         </div>
-
-        <span ref={focuser} className="focuser"></span>
       </div>
+
       {isArrowVisible && (
         <div
-          onClick={handleAutoScroll}
+          onClick={() => handleAutoScroll(true)}
           className={`fixed ${
             replyToMessage
               ? "bottom-[92px] sm:bottom-[117px]"
               : "bottom-14 sm:bottom-[73px]"
-          } right-[47%] bg-slate-200 text-gray-800 rounded-full p-1 cursor-pointer shadow-md dark:shadow-slate-600 z-50`}
+          } left-1/2 transform -translate-x-1/2 bg-slate-200 text-gray-800 rounded-full p-1 cursor-pointer z-50`}
         >
           <IoIosArrowDown size={24} className="text-black" />
         </div>
       )}
+
+      <span ref={focuser} className="focuser"></span>
+
       <ChatInput
         handleSendMessage={handleSendMessage}
         handleTyping={handleTyping}

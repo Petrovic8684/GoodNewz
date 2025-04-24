@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import ReactDOM from "react-dom";
-import axios from "axios";
+import api from "../config/api";
 import baseUrl from "../config/baseUrl";
 import { RiDeleteBinLine } from "react-icons/ri";
 import { FaRegSmile } from "react-icons/fa";
@@ -69,7 +69,7 @@ function ReactionPopup({
 
   return ReactDOM.createPortal(
     <div
-      className="absolute bg-gray-300 dark:bg-slate-600 p-2 rounded shadow-lg"
+      className="absolute bg-gray-200 dark:bg-slate-600 p-2 rounded shadow-lg"
       style={{
         top: parentRect.bottom + window.scrollY + 10,
         left: parentRect.left + window.scrollX - (isUserMessage ? 215 : 0),
@@ -83,7 +83,7 @@ function ReactionPopup({
             key={reaction}
             className={`cursor-pointer text-lg mx-1 p-1.5 ${
               isCurrentUserReaction
-                ? "bg-gray-400 dark:bg-gray-700 text-white rounded-full"
+                ? "bg-gray-300 dark:bg-gray-700 text-white rounded-full"
                 : ""
             }`}
             onClick={() => onReactionClick(reaction)}
@@ -145,8 +145,8 @@ function Message({
 
   const handleReaction = async (reaction) => {
     try {
-      await axios.post(
-        `${baseUrl}/messages/${message._id}/react`,
+      await api.post(
+        `/messages/${message._id}/react`,
         { reaction },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -176,7 +176,7 @@ function Message({
       );
       if (!isConfirmed) return;
 
-      await axios.delete(`${baseUrl}/messages/${message._id}`, {
+      await api.delete(`/messages/${message._id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
