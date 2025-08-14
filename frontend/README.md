@@ -1,8 +1,5 @@
-# React + Vite
+## 💻 Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend is built using **React** with **Tailwind CSS** for responsive and modern styling. Users can enjoy features like dark mode 🌙, animated landing page slogans, swipe gestures to quickly reply to messages, and an interactive message interface that displays reactions and allows message deletion. The profile management system supports username editing ✏️, profile image uploads 📸, and cropping ✂️ with real-time updates.
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Interactive elements like emoji reactions 😄, message previews, and modal popups ensure that users feel engaged while navigating the platform.
